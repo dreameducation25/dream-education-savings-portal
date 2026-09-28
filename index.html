@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dream Education Limited | Monthly Savings Portal</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--navy:#071827;--navy2:#0b2235;--gold:#c99732;--gold2:#f4d77d;--white:#fff;--muted:#9da9b5;--line:#273747;--green:#58d68d;--red:#ff7a86}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:radial-gradient(circle at top,#132e45 0,#07131e 42%,#04090d 100%);color:var(--white);min-height:100vh}
+button,input{font:inherit}.hidden{display:none!important}.top{height:74px;padding:10px 4%;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1c3041;background:rgba(5,15,24,.94);position:sticky;top:0;z-index:5;backdrop-filter:blur(14px)}
+.logo{height:54px;width:54px;object-fit:contain;border-radius:10px}.brand{display:flex;align-items:center;gap:13px}.brand b{letter-spacing:.6px}.brand small{display:block;color:var(--muted);margin-top:2px}.userbar{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:13px}
+.btn{border:1px solid #80621f;background:linear-gradient(135deg,#f1d26e,#b37b16);color:#111;font-weight:800;padding:10px 15px;border-radius:10px;cursor:pointer}.btn.secondary{background:#0e1c28;color:var(--white);border-color:#32475a}.btn.danger{background:#32151a;color:#ffd9dc;border-color:#6d3038}
+.wrap{max-width:1250px;margin:auto;padding:30px 4% 60px}.hero{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:22px}.hero h1{font-size:clamp(28px,4vw,46px);margin:0}.hero p{color:var(--muted);margin:7px 0 0}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:linear-gradient(145deg,rgba(18,37,53,.96),rgba(7,16,24,.96));border:1px solid #243a4d;border-radius:18px;padding:20px;box-shadow:0 18px 45px #0005}.label{font-size:11px;text-transform:uppercase;letter-spacing:1.1px;color:var(--muted)}.big{font-size:28px;font-weight:900;margin-top:7px}.gold{color:var(--gold2)}
+.cols{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;margin-top:16px}.title{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}.title h2{font-size:19px;margin:0}.pill{padding:6px 9px;border-radius:99px;background:#1b2a37;color:var(--gold2);font-size:11px;border:1px solid #5c4b28}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 8px;border-bottom:1px solid #223241;font-size:13px}th{color:var(--muted);font-weight:500}.ok{color:var(--green)}.muted{color:#7f8a94}
+.draw{text-align:center;min-height:430px;display:flex;flex-direction:column;align-items:center;justify-content:center}.draw h2{font-size:34px;margin:10px 0}.amount{font-size:44px;font-weight:950;color:var(--gold2)}.timer{font-size:28px;font-variant-numeric:tabular-nums;margin:14px 0}.winner{margin-top:15px;padding:18px 26px;border:1px solid #a47b25;border-radius:15px;background:#171306;min-width:80%}.winner .name{font-size:28px;font-weight:900;color:var(--gold2);margin-top:5px}.notice{color:var(--muted);font-size:12px;line-height:1.55;max-width:560px;margin-top:14px}
+.login{min-height:100vh;display:grid;place-items:center;padding:25px}.loginbox{width:min(440px,100%);padding:30px;border:1px solid #294154;border-radius:22px;background:linear-gradient(145deg,#102638,#07131e);box-shadow:0 25px 70px #0008}.loginbox img{width:110px;display:block;margin:0 auto 14px}.loginbox h1{text-align:center;font-size:25px;margin:4px 0}.loginbox p{text-align:center;color:var(--muted);font-size:13px}.field{margin:15px 0}.field label{display:block;color:#b9c4ce;font-size:12px;margin-bottom:7px}.field input{width:100%;padding:12px;border-radius:10px;border:1px solid #30485b;background:#07131e;color:white;outline:none}.field input:focus{border-color:var(--gold)}.full{width:100%}.error{color:#ff9da6;background:#30151a;border:1px solid #65323a;padding:9px;border-radius:9px;font-size:12px;margin-top:10px}
+.modal{position:fixed;inset:0;background:#000b;display:grid;place-items:center;z-index:20}.modalbox{width:min(560px,92%);background:#0d1d2a;border:1px solid #3a4f61;border-radius:20px;padding:25px}
+.footer{text-align:center;color:#687581;font-size:11px;margin-top:25px}
+@media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}.cols{grid-template-columns:1fr}.hero{align-items:start;flex-direction:column}}
+@media(max-width:520px){.cards{grid-template-columns:1fr}.top{height:auto;gap:10px}.userbar span{display:none}.brand b{font-size:13px}.brand small{font-size:10px}.draw h2{font-size:27px}.amount{font-size:36px}}
+</style>
+</head>
+<body>
+<div id="loginView" class="login">
+  <div class="loginbox">
+    <img src="assets/dream-education-logo.jpg" alt="Dream Education Limited">
+    <h1>Monthly Savings Portal</h1>
+    <p>Secure member access</p>
+    <div class="field"><label>Email</label><input id="email" type="email" autocomplete="username" placeholder="your@email.com"></div>
+    <div class="field"><label>Password</label><input id="password" type="password" autocomplete="current-password" placeholder="••••••••"></div>
+    <button class="btn full" id="loginBtn">Sign In</button>
+    <button class="btn secondary full" id="forgotBtn" style="margin-top:10px">Reset Password</button>
+    <div id="loginError" class="error hidden"></div>
+    <div id="resetMessage" class="notice hidden" style="text-align:center;margin-top:10px"></div>
+    <p style="margin-top:18px">Accounts are created by the administrator. No public sign-up is enabled.</p>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+<header class="top">
+  <div class="brand"><img class="logo" src="assets/dream-education-logo.jpg"><div><b>DREAM EDUCATION LIMITED</b><small>Monthly Savings Portal</small></div></div>
+  <div class="userbar"><span id="who"></span><button class="btn secondary" id="changePasswordBtn">Change Password</button><button class="btn secondary" id="logoutBtn">Sign Out</button></div>
+</header>
+<main class="wrap">
+  <div class="hero">
+    <div><h1>Monthly Savings Draw</h1><p>Transparent member rotation • secure shared records • one winner per month</p></div>
+    <div id="adminTools" class="hidden"><button class="btn" id="drawNowBtn">Run Due Draw</button></div>
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="label">Monthly contribution</div><div class="big">৳1,500</div></div>
+    <div class="card"><div class="label">Monthly fund</div><div class="big gold">৳7,500</div></div>
+    <div class="card"><div class="label">Members</div><div class="big" id="memberCount">5</div></div>
+    <div class="card"><div class="label">Eligible this cycle</div><div class="big" id="eligibleCount">—</div></div>
+  </div>
+
+  <div class="cols">
+    <section class="card">
+      <div class="title"><h2>Members & Contribution Status</h2><span class="pill" id="cyclePill">Cycle —</span></div>
+      <table><thead><tr><th>Member</th><th>Contribution</th><th>Payment</th><th>Draw</th></tr></thead><tbody id="membersBody"></tbody></table>
+    </section>
+
+    <section class="card draw">
+      <div class="label" id="cycleLabel">CURRENT DRAW</div>
+      <h2>Next Monthly Draw</h2>
+      <div class="amount">৳7,500</div>
+      <div class="timer" id="timer">Loading…</div>
+      <div id="winnerBox" class="winner hidden"><div class="label">MONTHLY RECIPIENT</div><div class="name" id="winnerName"></div><div id="winnerMeta" class="muted"></div></div>
+      <div class="notice">The draw is controlled by the database. A winner is selected only from the current cycle's eligible members. After the fifth winner, a new cycle is created automatically.</div>
+    </section>
+  </div>
+
+  <section class="card" style="margin-top:16px">
+    <div class="title"><h2>Draw History</h2><span class="pill">Shared record</span></div>
+    <table><thead><tr><th>Draw ID</th><th>Cycle</th><th>Winner</th><th>Amount</th><th>Date & Time</th></tr></thead><tbody id="historyBody"></tbody></table>
+  </section>
+  <div class="footer">Dream Education Limited • Private internal portal • Configure Supabase before sharing the live link.</div>
+</main>
+</div>
+
+<div id="adminModal" class="modal hidden"><div class="modalbox"><h2>Admin Setup</h2><p style="color:#aab5bf">Admin controls should be used only by the authorised company administrator.</p><button class="btn" id="closeModal">Close</button></div></div>
+<div id="passwordModal" class="modal hidden"><div class="modalbox">
+  <h2>Set New Password</h2>
+  <p style="color:#aab5bf">Enter a new password for your account.</p>
+  <div class="field"><label>New Password</label><input id="newPassword" type="password" autocomplete="new-password" placeholder="At least 8 characters"></div>
+  <div class="field"><label>Confirm New Password</label><input id="confirmPassword" type="password" autocomplete="new-password" placeholder="Repeat your password"></div>
+  <button class="btn full" id="updatePasswordBtn">Update Password</button>
+  <div id="passwordError" class="error hidden"></div>
+  <div id="passwordSuccess" class="notice hidden" style="text-align:center"></div>
+</div></div>
+
+<script src="config.js"></script>
+<script>
+const CONFIG = window.SUPABASE_CONFIG || JSON.parse(localStorage.getItem("dream_supabase_config") || "{}") || {};
+let sb = null, profile = null, currentCycle = null;
+const $ = id => document.getElementById(id);
+
+function showLoginError(msg){$("loginError").textContent=msg;$("loginError").classList.remove("hidden")}
+function money(n){return "৳"+Number(n||0).toLocaleString("en-US")}
+
+function showResetMessage(msg, isError=false){
+  $("resetMessage").textContent=msg;
+  $("resetMessage").classList.remove("hidden");
+  if(isError) $("resetMessage").style.color="#ff9da6";
+}
+async function handlePasswordRecovery(){
+  const hash=window.location.hash||"";
+  if(hash.includes("type=recovery")){
+    const {data:{session}}=await sb.auth.getSession();
+    if(session){
+      $("loginView").classList.remove("hidden");
+      $("app").classList.add("hidden");
+      $("passwordModal").classList.remove("hidden");
+      return true;
+    }
+  }
+  return false;
+}
+async function boot(){
+  if(!CONFIG.url || !CONFIG.anonKey){
+    showLoginError("Supabase is not configured yet. Please add the Project URL and Publishable/anon key in config.js, then reload this page.");
+    return;
+  }
+  sb = supabase.createClient(CONFIG.url, CONFIG.anonKey);
+  const recovering = await handlePasswordRecovery();
+  if(recovering) return;
+  const {data:{session}}=await sb.auth.getSession();
+  if(session) await enter(session.user);
+  sb.auth.onAuthStateChange((event, session) => {
+    if(event === "PASSWORD_RECOVERY" && session){
+      $("app").classList.add("hidden");
+      $("loginView").classList.remove("hidden");
+      $("passwordModal").classList.remove("hidden");
+    }
+  });
+}
+async function enter(user){
+  $("loginView").classList.add("hidden"); $("app").classList.remove("hidden");
+  const {data:p,error:profileError}=await sb.from("profiles").select("full_name,role,member_id").eq("id",user.id).single();
+  if(profileError && profileError.code !== "PGRST116"){
+    $("app").classList.add("hidden"); $("loginView").classList.remove("hidden");
+    showLoginError("Login succeeded, but the profile could not be loaded: " + profileError.message);
+    return;
+  }
+  profile=p||{full_name:user.email,role:"member"};
+  $("who").textContent=profile.full_name||user.email;
+  if(profile.role==="admin") $("adminTools").classList.remove("hidden");
+  await refresh();
+}
+async function refresh(){
+  const {data:cycle}=await sb.from("cycles").select("*").eq("is_current",true).single();
+  currentCycle=cycle;
+  if(!cycle){$("cycleLabel").textContent="NO ACTIVE CYCLE";return}
+  $("cyclePill").textContent=`Cycle ${String(cycle.cycle_no).padStart(2,"0")}`;
+  $("cycleLabel").textContent=`CURRENT DRAW • CYCLE ${String(cycle.cycle_no).padStart(2,"0")}`;
+  const {data:members}=await sb.from("members").select("*").eq("active",true).order("id");
+  $("memberCount").textContent=members?.length||0;
+  const {data:cm}=await sb.from("cycle_members").select("member_id,eligible").eq("cycle_id",cycle.id);
+  const elig=new Map((cm||[]).map(x=>[x.member_id,x.eligible]));
+  $("eligibleCount").textContent=(cm||[]).filter(x=>x.eligible).length;
+  const {data:payments}=await sb.from("contributions").select("member_id,status").eq("cycle_id",cycle.id);
+  const paid=new Map((payments||[]).map(x=>[x.member_id,x.status]));
+  $("membersBody").innerHTML=(members||[]).map(m=>`<tr><td><b>${m.full_name}</b></td><td>${money(1500)}</td><td class="${paid.get(m.id)==="paid"?"ok":"muted"}">${paid.get(m.id)==="paid"?"Paid":"Pending"}</td><td class="${elig.get(m.id)?"ok":"muted"}">${elig.get(m.id)?"Eligible":"Already won"}</td></tr>`).join("");
+  $("timer").textContent=cycle.next_draw_at?countdown(cycle.next_draw_at):"Draw time not set";
+  const {data:draws}=await sb.from("draws").select("draw_id,cycle_no,winner_name,amount,created_at").order("created_at",{ascending:false}).limit(20);
+  $("historyBody").innerHTML=(draws||[]).map(d=>`<tr><td>${d.draw_id}</td><td>Cycle ${String(d.cycle_no).padStart(2,"0")}</td><td><b>${d.winner_name}</b></td><td>${money(d.amount)}</td><td>${new Date(d.created_at).toLocaleString()}</td></tr>`).join("") || `<tr><td colspan="5" class="muted" style="text-align:center;padding:28px">No completed draws yet.</td></tr>`;
+}
+function countdown(ts){
+  const diff=new Date(ts).getTime()-Date.now(); if(diff<=0)return "DRAW TIME";
+  const s=Math.floor(diff/1000),d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60),sec=s%60;
+  return `${d}d ${String(h).padStart(2,"0")}h ${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s`;
+}
+async function runDueDraw(){
+  if(!sb)return;
+  const {data,error}=await sb.rpc("run_due_draw");
+  if(error){alert(error.message);return}
+  await refresh();
+  if(data?.winner_name){$("winnerBox").classList.remove("hidden");$("winnerName").textContent=data.winner_name;$("winnerMeta").textContent=`${money(data.amount)} • Draw ID ${data.draw_id}`}
+}
+$("loginBtn").onclick=async()=>{
+  $("loginBtn").disabled=true; $("loginError").classList.add("hidden");
+  const {data,error}=await sb.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});
+  if(error)showLoginError(error.message); else await enter(data.user);
+  $("loginBtn").disabled=false;
+};
+$("forgotBtn").onclick=async()=>{
+  if(!sb){showLoginError("Supabase is not configured yet.");return;}
+  const email=$("email").value.trim();
+  if(!email){showResetMessage("Please enter your email address first.", true);return;}
+  $("forgotBtn").disabled=true;
+  const redirectTo=window.location.origin+window.location.pathname;
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo});
+  if(error) showResetMessage(error.message,true);
+  else showResetMessage("Password reset email sent. Please check your inbox and use the link to set a new password.");
+  $("forgotBtn").disabled=false;
+};
+$("changePasswordBtn").onclick=()=>{
+  $("newPassword").value="";
+  $("confirmPassword").value="";
+  $("passwordError").classList.add("hidden");
+  $("passwordSuccess").classList.add("hidden");
+  $("passwordModal").classList.remove("hidden");
+};
+$("updatePasswordBtn").onclick=async()=>{
+  const pw=$("newPassword").value, cpw=$("confirmPassword").value;
+  $("passwordError").classList.add("hidden");
+  if(pw.length<8){$("passwordError").textContent="Password must be at least 8 characters.";$("passwordError").classList.remove("hidden");return;}
+  if(pw!==cpw){$("passwordError").textContent="Passwords do not match.";$("passwordError").classList.remove("hidden");return;}
+  const {error}=await sb.auth.updateUser({password:pw});
+  if(error){$("passwordError").textContent=error.message;$("passwordError").classList.remove("hidden");return;}
+  $("passwordSuccess").textContent="Password updated successfully. You can now sign in with your new password.";
+  $("passwordSuccess").classList.remove("hidden");
+  setTimeout(()=>{
+    $("passwordModal").classList.add("hidden");
+    window.history.replaceState({}, document.title, window.location.pathname);
+  },1200);
+};
+$("logoutBtn").onclick=()=>sb.auth.signOut().then(()=>location.reload());
+$("drawNowBtn").onclick=runDueDraw;
+$("closeModal").onclick=()=>$("adminModal").classList.add("hidden");
+setInterval(async()=>{if(sb && currentCycle){$("timer").textContent=countdown(currentCycle.next_draw_at);if(new Date(currentCycle.next_draw_at)<=new Date()) await runDueDraw()}},5000);
+boot();
+</script>
+
+</html>
