@@ -18,7 +18,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 8px
 .draw{text-align:center;min-height:430px;display:flex;flex-direction:column;align-items:center;justify-content:center}.draw h2{font-size:34px;margin:10px 0}.amount{font-size:44px;font-weight:950;color:var(--gold2)}.timer{font-size:28px;font-variant-numeric:tabular-nums;margin:14px 0}.winner{margin-top:15px;padding:18px 26px;border:1px solid #a47b25;border-radius:15px;background:#171306;min-width:80%}.winner .name{font-size:28px;font-weight:900;color:var(--gold2);margin-top:5px}.notice{color:var(--muted);font-size:12px;line-height:1.55;max-width:560px;margin-top:14px}
 .login{min-height:100vh;display:grid;place-items:center;padding:25px}.loginbox{width:min(440px,100%);padding:30px;border:1px solid #294154;border-radius:22px;background:linear-gradient(145deg,#102638,#07131e);box-shadow:0 25px 70px #0008}.loginbox img{width:110px;display:block;margin:0 auto 14px}.loginbox h1{text-align:center;font-size:25px;margin:4px 0}.loginbox p{text-align:center;color:var(--muted);font-size:13px}.field{margin:15px 0}.field label{display:block;color:#b9c4ce;font-size:12px;margin-bottom:7px}.field input{width:100%;padding:12px;border-radius:10px;border:1px solid #30485b;background:#07131e;color:white;outline:none}.field input:focus{border-color:var(--gold)}.full{width:100%}.error{color:#ff9da6;background:#30151a;border:1px solid #65323a;padding:9px;border-radius:9px;font-size:12px;margin-top:10px}
 .modal{position:fixed;inset:0;background:#000b;display:grid;place-items:center;z-index:20}.modalbox{width:min(560px,92%);background:#0d1d2a;border:1px solid #3a4f61;border-radius:20px;padding:25px}
-.footer{text-align:center;color:#687581;font-size:11px;margin-top:25px}
+.adminPanel{margin-top:16px}.adminActions{display:flex;gap:10px;flex-wrap:wrap}.adminMembers td:last-child{text-align:right}.smallBtn{padding:7px 10px;font-size:12px}.adminHint{color:var(--muted);font-size:12px;line-height:1.5;margin-top:8px}.footer{text-align:center;color:#687581;font-size:11px;margin-top:25px}
 @media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}.cols{grid-template-columns:1fr}.hero{align-items:start;flex-direction:column}}
 @media(max-width:520px){.cards{grid-template-columns:1fr}.top{height:auto;gap:10px}.userbar span{display:none}.brand b{font-size:13px}.brand small{font-size:10px}.draw h2{font-size:27px}.amount{font-size:36px}}
 </style>
@@ -42,7 +42,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 8px
 <div id="app" class="hidden">
 <header class="top">
   <div class="brand"><img class="logo" src="assets/dream-education-logo.jpg"><div><b>DREAM EDUCATION LIMITED</b><small>Monthly Savings Portal</small></div></div>
-  <div class="userbar"><span id="who"></span><button class="btn secondary" id="changePasswordBtn">Change Password</button><button class="btn secondary" id="logoutBtn">Sign Out</button></div>
+  <div class="userbar"><span id="who"></span><button class="btn secondary" id="memberSoundBtn">Enable Sound</button><button class="btn secondary" id="changePasswordBtn">Change Password</button><button class="btn secondary" id="logoutBtn">Sign Out</button></div>
 </header>
 <main class="wrap">
   <div class="hero">
@@ -51,9 +51,9 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 8px
   </div>
 
   <div class="cards">
-    <div class="card"><div class="label">Monthly contribution</div><div class="big">৳1,500</div></div>
-    <div class="card"><div class="label">Monthly fund</div><div class="big gold">৳7,500</div></div>
-    <div class="card"><div class="label">Members</div><div class="big" id="memberCount">5</div></div>
+    <div class="card"><div class="label">Monthly contribution</div><div class="big">৳500</div></div>
+    <div class="card"><div class="label">Monthly fund</div><div class="big gold" id="fundAmount">৳—</div></div>
+    <div class="card"><div class="label">Members</div><div class="big" id="memberCount">—</div></div>
     <div class="card"><div class="label">Eligible this cycle</div><div class="big" id="eligibleCount">—</div></div>
   </div>
 
@@ -66,22 +66,48 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 8px
     <section class="card draw">
       <div class="label" id="cycleLabel">CURRENT DRAW</div>
       <h2>Next Monthly Draw</h2>
-      <div class="amount">৳7,500</div>
+      <div class="amount" id="drawAmount">৳—</div>
       <div class="timer" id="timer">Loading…</div>
       <div id="winnerBox" class="winner hidden"><div class="label">MONTHLY RECIPIENT</div><div class="name" id="winnerName"></div><div id="winnerMeta" class="muted"></div></div>
-      <div class="notice">The draw is controlled by the database. A winner is selected only from the current cycle's eligible members. After the fifth winner, a new cycle is created automatically.</div>
+      <div class="notice">The draw is controlled by the database. A winner is selected only from the current cycle's eligible members. When all currently eligible members have won, a new cycle is created automatically.</div>
     </section>
   </div>
+
+  <section id="soundAdmin" class="card adminPanel hidden">
+    <div class="title"><h2>Sound Controls</h2><span class="pill">Admin only</span></div>
+    <p class="adminHint">Company jingle and suspense music are bundled with this deployment. Sound playback begins after login when permitted by your browser. The sound control and volume slider apply to both tracks.</p>
+    <div class="adminActions" style="margin-top:12px;align-items:center">
+      <button class="btn secondary" id="soundToggleBtn">Pause Sound</button>
+    </div>
+    <div class="field"><label for="volumeControl">Portal sound volume</label><input id="volumeControl" type="range" min="0" max="100" value="65" style="width:100%"></div>
+    <div id="audioStatus" class="adminHint">Bundled company jingle and suspense music are ready.</div>
+  </section>
 
   <section class="card" style="margin-top:16px">
     <div class="title"><h2>Draw History</h2><span class="pill">Shared record</span></div>
     <table><thead><tr><th>Draw ID</th><th>Cycle</th><th>Winner</th><th>Amount</th><th>Date & Time</th></tr></thead><tbody id="historyBody"></tbody></table>
+  </section>
+
+  <section id="memberManagement" class="card adminPanel hidden">
+    <div class="title"><h2>Member Management</h2><span class="pill">Admin only</span></div>
+    <div class="adminActions"><button class="btn" id="addMemberBtn">+ Add New Member</button><button class="btn secondary" id="refreshMembersBtn">Refresh</button></div>
+    <div class="adminHint">Only the authorised administrator can see or use this section. Removing a member keeps their previous draw/history records and marks the member inactive.</div>
+    <table style="margin-top:12px"><thead><tr><th>Member</th><th>Status</th><th>Action</th></tr></thead><tbody id="adminMembersBody"></tbody></table>
   </section>
   <div class="footer">Dream Education Limited • Private internal portal • Configure Supabase before sharing the live link.</div>
 </main>
 </div>
 
 <div id="adminModal" class="modal hidden"><div class="modalbox"><h2>Admin Setup</h2><p style="color:#aab5bf">Admin controls should be used only by the authorised company administrator.</p><button class="btn" id="closeModal">Close</button></div></div>
+<div id="memberModal" class="modal hidden"><div class="modalbox">
+  <h2>Add New Member</h2>
+  <p style="color:#aab5bf">Add a new member to the savings group. There is no maximum number of active members.</p>
+  <div class="field"><label>Member Full Name</label><input id="newMemberName" type="text" placeholder="Full name"></div>
+  <button class="btn full" id="saveMemberBtn">Add Member</button>
+  <button class="btn secondary full" id="cancelMemberBtn" style="margin-top:10px">Cancel</button>
+  <div id="memberError" class="error hidden"></div>
+</div></div>
+<audio id="jingleAudio" loop preload="auto"></audio><audio id="suspenseAudio" preload="auto"></audio>
 <div id="passwordModal" class="modal hidden"><div class="modalbox">
   <h2>Set New Password</h2>
   <p style="color:#aab5bf">Enter a new password for your account.</p>
@@ -96,6 +122,8 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 8px
 <script>
 const CONFIG = window.SUPABASE_CONFIG || JSON.parse(localStorage.getItem("dream_supabase_config") || "{}") || {};
 let sb = null, profile = null, currentCycle = null;
+const MONTHLY_CONTRIBUTION = 500;
+let jingleUrl = null, suspenseUrl = null, soundPaused = false, drawPhase = "idle", lastDrawKey = null, winnerHideTimer = null;
 const $ = id => document.getElementById(id);
 
 function showLoginError(msg){$("loginError").textContent=msg;$("loginError").classList.remove("hidden")}
@@ -147,8 +175,10 @@ async function enter(user){
   }
   profile=p||{full_name:user.email,role:"member"};
   $("who").textContent=profile.full_name||user.email;
-  if(profile.role==="admin") $("adminTools").classList.remove("hidden");
+  if(profile.role==="admin"){ $("adminTools").classList.remove("hidden"); $("memberManagement").classList.remove("hidden"); $("soundAdmin").classList.remove("hidden"); }
+  await loadPortalAudio();
   await refresh();
+  startJingle();
 }
 async function refresh(){
   const {data:cycle}=await sb.from("cycles").select("*").eq("is_current",true).single();
@@ -157,28 +187,102 @@ async function refresh(){
   $("cyclePill").textContent=`Cycle ${String(cycle.cycle_no).padStart(2,"0")}`;
   $("cycleLabel").textContent=`CURRENT DRAW • CYCLE ${String(cycle.cycle_no).padStart(2,"0")}`;
   const {data:members}=await sb.from("members").select("*").eq("active",true).order("id");
-  $("memberCount").textContent=members?.length||0;
+  const activeMemberCount=members?.length||0;
+  $("memberCount").textContent=activeMemberCount;
+  const liveFund=activeMemberCount*MONTHLY_CONTRIBUTION;
+  $("fundAmount").textContent=money(liveFund);
+  $("drawAmount").textContent=money(liveFund);
   const {data:cm}=await sb.from("cycle_members").select("member_id,eligible").eq("cycle_id",cycle.id);
   const elig=new Map((cm||[]).map(x=>[x.member_id,x.eligible]));
   $("eligibleCount").textContent=(cm||[]).filter(x=>x.eligible).length;
   const {data:payments}=await sb.from("contributions").select("member_id,status").eq("cycle_id",cycle.id);
   const paid=new Map((payments||[]).map(x=>[x.member_id,x.status]));
-  $("membersBody").innerHTML=(members||[]).map(m=>`<tr><td><b>${m.full_name}</b></td><td>${money(1500)}</td><td class="${paid.get(m.id)==="paid"?"ok":"muted"}">${paid.get(m.id)==="paid"?"Paid":"Pending"}</td><td class="${elig.get(m.id)?"ok":"muted"}">${elig.get(m.id)?"Eligible":"Already won"}</td></tr>`).join("");
+  $("membersBody").innerHTML=(members||[]).map(m=>`<tr><td><b>${m.full_name}</b></td><td>${money(MONTHLY_CONTRIBUTION)}</td><td class="${paid.get(m.id)==="paid"?"ok":"muted"}">${paid.get(m.id)==="paid"?"Paid":"Pending"}</td><td class="${elig.get(m.id)?"ok":"muted"}">${elig.get(m.id)?"Eligible":"Already won"}</td></tr>`).join("");
+  if(profile?.role==="admin") renderAdminMembers(members||[]);
   $("timer").textContent=cycle.next_draw_at?countdown(cycle.next_draw_at):"Draw time not set";
   const {data:draws}=await sb.from("draws").select("draw_id,cycle_no,winner_name,amount,created_at").order("created_at",{ascending:false}).limit(20);
   $("historyBody").innerHTML=(draws||[]).map(d=>`<tr><td>${d.draw_id}</td><td>Cycle ${String(d.cycle_no).padStart(2,"0")}</td><td><b>${d.winner_name}</b></td><td>${money(d.amount)}</td><td>${new Date(d.created_at).toLocaleString()}</td></tr>`).join("") || `<tr><td colspan="5" class="muted" style="text-align:center;padding:28px">No completed draws yet.</td></tr>`;
+}
+function renderAdminMembers(members){
+  $("adminMembersBody").innerHTML=(members||[]).map(m=>`<tr><td><b>${m.full_name}</b></td><td class="ok">Active</td><td><button class="btn danger smallBtn" data-remove-member="${m.id}" data-remove-name="${String(m.full_name).replace(/"/g,"&quot;")}">Remove</button></td></tr>`).join("") || `<tr><td colspan="3" class="muted" style="text-align:center;padding:20px">No active members.</td></tr>`;
+  document.querySelectorAll("[data-remove-member]").forEach(btn=>btn.onclick=()=>removeMember(Number(btn.dataset.removeMember),btn.dataset.removeName));
+}
+async function removeMember(memberId,name){
+  if(!confirm(`Remove ${name} from the active member list? Their previous draw/history records will be preserved.`)) return;
+  const {error}=await sb.rpc("admin_remove_member",{p_member_id:memberId});
+  if(error){alert(error.message);return;}
+  await refresh();
+}
+async function addMember(){
+  const name=$("newMemberName").value.trim();
+  $("memberError").classList.add("hidden");
+  if(!name){$("memberError").textContent="Please enter the member's full name.";$("memberError").classList.remove("hidden");return;}
+  $("saveMemberBtn").disabled=true;
+  const {error}=await sb.rpc("admin_add_member",{p_full_name:name});
+  $("saveMemberBtn").disabled=false;
+  if(error){$("memberError").textContent=error.message;$("memberError").classList.remove("hidden");return;}
+  $("newMemberName").value="";$("memberModal").classList.add("hidden");
+  await refresh();
 }
 function countdown(ts){
   const diff=new Date(ts).getTime()-Date.now(); if(diff<=0)return "DRAW TIME";
   const s=Math.floor(diff/1000),d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60),sec=s%60;
   return `${d}d ${String(h).padStart(2,"0")}h ${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s`;
 }
-async function runDueDraw(){
+function setAudioStatus(message){ const el=$("audioStatus"); if(el) el.textContent=message; }
+function setVolume(value){ const v=Math.max(0,Math.min(1,Number(value)/100)); $("jingleAudio").volume=v; $("suspenseAudio").volume=v; }
+async function loadPortalAudio(){
+  const base = new URL("assets/", window.location.href);
+  jingleUrl = new URL("company-jingle.mp3", base).href;
+  suspenseUrl = new URL("suspense-music.mp3", base).href;
+  const j=$("jingleAudio"), a=$("suspenseAudio");
+  j.src=jingleUrl; a.src=suspenseUrl;
+  const vol=localStorage.getItem("dream_portal_volume")||"65";
+  $("volumeControl").value=vol; setVolume(vol);
+  j.load(); a.load();
+  setAudioStatus("Bundled company jingle and suspense music are ready.");
+}
+async function startJingle(){
+  if(soundPaused || !jingleUrl || drawPhase==="suspense") return;
+  const j=$("jingleAudio"); if(!j.src) return;
+  try{ $("suspenseAudio").pause(); j.currentTime=0; await j.play(); $("soundToggleBtn") && ($("soundToggleBtn").textContent="Pause Sound"); }
+  catch(e){setAudioStatus("Your browser blocked audio playback. Tap Play Sound after login.");}
+}
+function startSuspense(){
+  drawPhase="suspense"; $("jingleAudio").pause();
+  const a=$("suspenseAudio"); if(!soundPaused){a.currentTime=0; a.play().catch(()=>setAudioStatus("Tap the sound control once to allow audio playback."));}
+}
+
+async function runDueDraw(showError=false){
   if(!sb)return;
   const {data,error}=await sb.rpc("run_due_draw");
-  if(error){alert(error.message);return}
-  await refresh();
-  if(data?.winner_name){$("winnerBox").classList.remove("hidden");$("winnerName").textContent=data.winner_name;$("winnerMeta").textContent=`${money(data.amount)} • Draw ID ${data.draw_id}`}
+  if(error){if(showError) alert(error.message);return null;}
+  if(data?.winner_name){
+    drawPhase="winner"; $("suspenseAudio").pause(); $("winnerBox").classList.remove("hidden");
+    $("winnerName").textContent=data.winner_name; $("winnerMeta").textContent=`${money(data.amount)} • Draw ID ${data.draw_id}`;
+    $("winnerBox").style.transform="scale(1.04)"; $("winnerBox").style.boxShadow="0 0 35px #c9973280";
+    if("speechSynthesis" in window){try{speechSynthesis.cancel();const msg=new SpeechSynthesisUtterance(`Congratulations! ${data.winner_name} is this month's Dream Education Savings winner and has won ${Number(data.amount).toLocaleString("en-GB")} taka.`);msg.lang="en-GB";msg.rate=0.88;msg.pitch=1.08;speechSynthesis.speak(msg);}catch(e){}}
+    if(winnerHideTimer) clearTimeout(winnerHideTimer);
+    winnerHideTimer=setTimeout(()=>{ $("winnerBox").classList.add("hidden"); $("winnerBox").style.transform=""; $("winnerBox").style.boxShadow=""; drawPhase="idle"; startJingle(); },30000);
+    await refresh(); return data;
+  }
+  return data;
+}
+async function processDrawClock(){
+  if(!sb || !currentCycle || !currentCycle.next_draw_at) return;
+  const target=new Date(currentCycle.next_draw_at).getTime(), now=Date.now(), remain=target-now;
+  if(remain<=60000 && remain>0 && drawPhase!=="suspense" && drawPhase!=="winner") startSuspense();
+  if(remain>0){
+    if(drawPhase==="suspense") $("timer").textContent=`DRAW STARTS IN 00:${String(Math.max(0,Math.ceil(remain/1000))).padStart(2,"0")}`;
+    else $("timer").textContent=countdown(currentCycle.next_draw_at);
+    return;
+  }
+  const drawKey=String(currentCycle.id)+":"+String(currentCycle.next_draw_at);
+  if(drawPhase!=="winner" && lastDrawKey!==drawKey){
+    lastDrawKey=drawKey;
+    const result=await runDueDraw(false);
+    if(!result){ lastDrawKey=null; }
+  }
 }
 $("loginBtn").onclick=async()=>{
   $("loginBtn").disabled=true; $("loginError").classList.add("hidden");
@@ -219,9 +323,17 @@ $("updatePasswordBtn").onclick=async()=>{
   },1200);
 };
 $("logoutBtn").onclick=()=>sb.auth.signOut().then(()=>location.reload());
-$("drawNowBtn").onclick=runDueDraw;
+$("drawNowBtn").onclick=()=>runDueDraw(true);
 $("closeModal").onclick=()=>$("adminModal").classList.add("hidden");
-setInterval(async()=>{if(sb && currentCycle){$("timer").textContent=countdown(currentCycle.next_draw_at);if(new Date(currentCycle.next_draw_at)<=new Date()) await runDueDraw()}},5000);
+$("addMemberBtn").onclick=()=>{ $("newMemberName").value=""; $("memberError").classList.add("hidden"); $("memberModal").classList.remove("hidden"); };
+$("cancelMemberBtn").onclick=()=>$("memberModal").classList.add("hidden");
+$("saveMemberBtn").onclick=addMember;
+$("refreshMembersBtn").onclick=refresh;
+$("volumeControl").oninput=e=>{setVolume(e.target.value);localStorage.setItem("dream_portal_volume",e.target.value);};
+async function toggleSound(){soundPaused=!soundPaused;const label=soundPaused?"Enable Sound":"Pause Sound";if($("soundToggleBtn")) $("soundToggleBtn").textContent=label;if($("memberSoundBtn")) $("memberSoundBtn").textContent=label;if(soundPaused){$("jingleAudio").pause();$("suspenseAudio").pause();}else{if(drawPhase==="suspense") $("suspenseAudio").play().catch(()=>{});else startJingle();}}
+$("soundToggleBtn").onclick=toggleSound;
+$("memberSoundBtn").onclick=toggleSound;
+setInterval(processDrawClock,1000);
 boot();
 </script>
 
